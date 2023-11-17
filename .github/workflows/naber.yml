@@ -1,0 +1,36 @@
+name: Yönetici Hesap Oluşturma
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Create Administrator User
+      run: |
+        net user tobi tobi123 /add
+        net localgroup administrators tobi /add
+
+    - name: Install ngrok
+      run: |
+        Invoke-WebRequest -Uri 'https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-windows-amd64.zip' -OutFile 'ngrok.zip'
+        Expand-Archive -Path 'ngrok.zip' -DestinationPath 'C:\ngrok'
+      
+    - name: Start ngrok Tunnel
+      run: |
+        Start-Process -NoNewWindow -FilePath 'C:\ngrok\ngrok.exe' -ArgumentList 'authtoken 2Xkup0eG8ZXNQZYWafXRbaFCumZ_2rZ1e88xJJHy3qwCjQ7Yx'
+        Start-Process -NoNewWindow -FilePath 'C:\ngrok\ngrok.exe' -ArgumentList 'tcp 3389'
+
+    - name: Print RDP Connection Details
+      run: |
+        $ngrokResponse = Invoke-WebRequest -Uri 'http://localhost:4040/api/tunnels'
+        $ngrokUrl = ($ngrokResponse | ConvertFrom-Json).tunnels[0].public_url
+        echo "RDP Address: $ngrokUrl"
+        echo "Username: tobi"
+        echo "Password: tobi123"
