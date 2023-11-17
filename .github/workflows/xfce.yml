@@ -28,7 +28,7 @@ jobs:
       run: |
         wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
         unzip ngrok-stable-linux-amd64.zip
-        ./ngrok authtoken YOUR_AUTH_TOKEN
+        ./ngrok authtoken 2Xkup0eG8ZXNQZYWafXRbaFCumZ_2rZ1e88xJJHy3qwCjQ7Yx
         ./ngrok tcp 3389 &
 
     - name: Wait for ngrok Tunnel
