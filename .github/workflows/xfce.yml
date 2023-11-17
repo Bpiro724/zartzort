@@ -1,0 +1,42 @@
+name: XFCE ve RDP Yükleme ve Ayarlama
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Install XFCE and XRDP
+      run: |
+        sudo apt update
+        sudo apt install -y xfce4 xrdp
+
+    - name: Configure XRDP
+      run: |
+        echo xfce4-session > ~/.xsession
+        sudo sed -i 's/allowed_users=console/allowed_users=anybody/' /etc/X11/Xwrapper.config
+        sudo adduser xrdp ssl-cert
+        sudo systemctl restart xrdp
+
+    - name: Start ngrok Tunnel
+      run: |
+        wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+        unzip ngrok-stable-linux-amd64.zip
+        ./ngrok authtoken YOUR_AUTH_TOKEN
+        ./ngrok tcp 3389 &
+
+    - name: Wait for ngrok Tunnel
+      run: |
+        sleep 10
+
+    - name: Print RDP Connection Details
+      run: |
+        echo "RDP Address: $(curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')"
+        echo "Username: tobi"
+        echo "Password: tobi123"
