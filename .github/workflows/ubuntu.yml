@@ -1,0 +1,42 @@
+name: Ubuntu GNOME with Ngrok and xrdp
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up GNOME Core and xrdp
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ubuntu-desktop gnome-core xrdp
+        sudo systemctl enable xrdp
+        sudo systemctl start xrdp
+
+    - name: Download and install Ngrok
+      run: |
+        wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+        unzip ngrok-stable-linux-amd64.zip
+        chmod +x ngrok
+        sudo mv ngrok /usr/local/bin/ngrok
+
+    - name: Set Ngrok authentication token
+      run: |
+        echo "authtoken: 2Xkup0eG8ZXNQZYWafXRbaFCumZ_2rZ1e88xJJHy3qwCjQ7Yx" > ngrok.yml
+
+    - name: Expose xrdp using Ngrok
+      run: |
+        ngrok tcp 3389 --config ngrok.yml
+
+    - name: Use RDP credentials
+      run: |
+        echo "username=tobi password=P@ssw0rd!" > rdp-credentials.txt
+
+    # Additional steps for your specific project setup, tests, etc.
